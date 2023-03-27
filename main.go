@@ -17,16 +17,16 @@ import (
 )
 
 const (
-	screenWidth  = 520 / 10
-	screenHeight = 640 / 10
-	gameWidth    = 320 / 10
-	gameHeight   = 640 / 10
-	infoWidth    = 200 / 10
-	blockSize    = 32 / 10
-	scoreX       = 340 / 10
-	scoreY       = 32 / 10
-	gameTipX     = 340 / 10
-	gameTipY     = 320 / 10
+	screenWidth  = 520
+	screenHeight = 640
+	gameWidth    = 320
+	gameHeight   = 640
+	infoWidth    = 200
+	blockSize    = 32
+	scoreX       = 340
+	scoreY       = 32
+	gameTipX     = 340
+	gameTipY     = 320
 )
 
 var (
@@ -235,7 +235,7 @@ func (g *Game) Update() error {
 		ebiten.SetMaxTPS(0)
 		return nil
 	}
-	// 处理用户输入 ebiten.IsKeyPressed
+	// 处理用户输入
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		paused = !paused
 	}
@@ -320,7 +320,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 	text.Draw(screen, fmt.Sprintf("Score: %d", totalScore), fontGame, scoreX, scoreY, color.White)
 
-	if gameOver {
+	if gameOver || paused {
 		tt, err := opentype.Parse(fonts.MPlus1pRegular_ttf)
 		if err != nil {
 			log.Fatal(err)
@@ -330,7 +330,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			DPI:     72,
 			Hinting: font.HintingFull,
 		})
-		text.Draw(screen, "GAME OVER", fontGame1, gameTipX, gameTipY, color.White)
+		str := ""
+		if gameOver {
+			str = "GAME OVER"
+		}
+		if paused {
+			str = "PAUSED"
+		}
+		text.Draw(screen, str, fontGame1, gameTipX, gameTipY, color.White)
 	}
 }
 
