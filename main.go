@@ -2,6 +2,11 @@ package main
 
 import (
 	"fmt"
+	"image/color"
+	"log"
+	"math/rand"
+	"time"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
@@ -9,21 +14,19 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
-	"image/color"
-	"log"
-	"math/rand"
-	"time"
 )
 
 const (
-	screenWidth  = 520
-	screenHeight = 640
-	gameWidth    = 320
-	gameHeight   = 640
-	infoWidth    = 200
-	blockSize    = 32
-	scoreX       = 340
-	scoreY       = 32
+	screenWidth  = 520 / 10
+	screenHeight = 640 / 10
+	gameWidth    = 320 / 10
+	gameHeight   = 640 / 10
+	infoWidth    = 200 / 10
+	blockSize    = 32 / 10
+	scoreX       = 340 / 10
+	scoreY       = 32 / 10
+	gameTipX     = 340 / 10
+	gameTipY     = 320 / 10
 )
 
 var (
@@ -96,9 +99,11 @@ var (
 
 	totalScore   int
 	frameCount   int
-	fallInterval = 30
+	fallInterval = 3
 	blockImages  []*ebiten.Image
 	fontGame     font.Face
+	gameOver     = false
+	paused       = false
 )
 
 type block struct {
@@ -190,6 +195,11 @@ func moveDown() {
 	if canMoveDown() {
 		curY++
 	} else {
+		//新方块出来就是0且无法下坠, 游戏结束
+		if curY == 0 {
+			gameOver = true
+		}
+
 		// 将当前方块放入游戏状态中
 		for i := range curBlock {
 			for j := range curBlock[i] {
@@ -198,6 +208,7 @@ func moveDown() {
 				}
 			}
 		}
+
 		// 随机生成下一个方块状态
 		curBlock = nextBlock
 		curColor = nextColor
@@ -213,7 +224,24 @@ type Game struct {
 
 func (g *Game) Update() error {
 
+	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+		initGame()
+		gameOver = false
+		paused = false
+	}
+
+	if gameOver {
+		// 如果游戏已经结束，则停止更新游戏画面
+		ebiten.SetMaxTPS(0)
+		return nil
+	}
 	// 处理用户输入 ebiten.IsKeyPressed
+	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+		paused = !paused
+	}
+	if paused {
+		return nil
+	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
 		moveLeft()
 	}
@@ -291,6 +319,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	}
 	text.Draw(screen, fmt.Sprintf("Score: %d", totalScore), fontGame, scoreX, scoreY, color.White)
+
+	if gameOver {
+		tt, err := opentype.Parse(fonts.MPlus1pRegular_ttf)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fontGame1, _ := opentype.NewFace(tt, &opentype.FaceOptions{
+			Size:    32,
+			DPI:     72,
+			Hinting: font.HintingFull,
+		})
+		text.Draw(screen, "GAME OVER", fontGame1, gameTipX, gameTipY, color.White)
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -319,6 +360,10 @@ func init() {
 		Hinting: font.HintingFull,
 	})
 
+	initGame()
+}
+
+func initGame() {
 	// 初始化游戏状态
 	game = make([][]int, gameHeight/blockSize)
 	for i := range game {
