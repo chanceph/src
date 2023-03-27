@@ -99,7 +99,7 @@ var (
 
 	totalScore   int
 	frameCount   int
-	fallInterval = 3
+	fallInterval = 10
 	blockImages  []*ebiten.Image
 	fontGame     font.Face
 	gameOver     = false
@@ -232,7 +232,7 @@ func (g *Game) Update() error {
 
 	if gameOver {
 		// 如果游戏已经结束，则停止更新游戏画面
-		ebiten.SetMaxTPS(0)
+		// ebiten.SetMaxTPS(0)
 		return nil
 	}
 	// 处理用户输入
