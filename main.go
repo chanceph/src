@@ -388,6 +388,12 @@ func init() {
 	})
 
 	initGame()
+	// 加载方块图片资源
+	for i := 0; i < 8; i++ {
+		img := ebiten.NewImage(blockSize, blockSize)
+		img.Fill(colors[i])
+		blockImages = append(blockImages, img)
+	}
 }
 
 func initGame() {
@@ -405,12 +411,4 @@ func initGame() {
 	nextBlock, nextColor = getRandomBlock()
 	nextX = (gameWidth / blockSize) + ((infoWidth)/blockSize-len(curBlock[0]))/2
 	nextY = 2
-
-	// 加载方块图片资源
-	for i := 0; i < 8; i++ {
-		img := ebiten.NewImage(blockSize, blockSize)
-		img.Fill(colors[i])
-		blockImages = append(blockImages, img)
-	}
-	ebiten.NewImage(screenHeight, screenWidth)
 }
