@@ -38,7 +38,7 @@ var (
 		{255, 0, 255, 255}, // 紫色
 		{0, 255, 255, 255}, // 青色
 		{255, 165, 0, 255}, // 橙色
-		//{128, 128, 128, 255}, // 灰色
+		{128, 128, 128, 255}, // 灰色
 	}
 
 	blocks = [][][]int{
@@ -292,7 +292,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if game[i][j] != 0 {
 				op := &ebiten.DrawImageOptions{}
 				op.GeoM.Translate(float64(j*blockSize), float64(i*blockSize))
-				screen.DrawImage(blockImages[game[i][j]-1], op)
+				screen.DrawImage(blockImages[7], op)
 			}
 		}
 	}
@@ -348,7 +348,6 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Tetris")
-	ebiten.SetWindowPosition(100, 950)
 
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		panic(err)
@@ -387,7 +386,7 @@ func initGame() {
 	nextY = 2
 
 	// 加载方块图片资源
-	for i := 0; i < 7; i++ {
+	for i := 0; i < 8; i++ {
 		img := ebiten.NewImage(blockSize, blockSize)
 		img.Fill(colors[i])
 		blockImages = append(blockImages, img)
