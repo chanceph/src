@@ -31,13 +31,13 @@ const (
 
 var (
 	colors = []color.RGBA{
-		{255, 0, 0, 255},   // 红色
-		{0, 255, 0, 255},   // 绿色
-		{0, 0, 255, 255},   // 蓝色
-		{255, 255, 0, 255}, // 黄色
-		{255, 0, 255, 255}, // 紫色
-		{0, 255, 255, 255}, // 青色
-		{255, 165, 0, 255}, // 橙色
+		{255, 0, 0, 255},     // 红色
+		{0, 255, 0, 255},     // 绿色
+		{0, 0, 255, 255},     // 蓝色
+		{255, 255, 0, 255},   // 黄色
+		{255, 0, 255, 255},   // 紫色
+		{0, 255, 255, 255},   // 青色
+		{255, 165, 0, 255},   // 橙色
 		{128, 128, 128, 255}, // 灰色
 	}
 
@@ -99,7 +99,7 @@ var (
 
 	totalScore   int
 	frameCount   int
-	fallInterval = 10
+	fallInterval = 60
 	blockImages  []*ebiten.Image
 	fontGame     font.Face
 	gameOver     = false
@@ -224,6 +224,17 @@ type Game struct {
 
 func (g *Game) Update() error {
 
+	switch {
+	case totalScore > 4000:
+		fallInterval = 5
+	case totalScore > 3000:
+		fallInterval = 10
+	case totalScore > 2000:
+		fallInterval = 20
+	case totalScore > 1000:
+		fallInterval = 40
+	}
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
 		initGame()
 		gameOver = false
@@ -269,7 +280,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DrawRect(screen, 0, 0, gameWidth, gameHeight, color.White)
 
 	// 计算分数
-	score := 0
+	score, completedRows := 0, 0
 	for i := range game {
 		fullLine := true
 		for j := range game[i] {
@@ -279,10 +290,20 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 		}
 		if fullLine {
+			completedRows++
 			copy(game[1:i+1], game[:i])
 			game[0] = make([]int, gameWidth/blockSize)
-			score += 10
 		}
+	}
+	switch completedRows {
+	case 1:
+		score = 10
+	case 2:
+		score = 30
+	case 3:
+		score = 60
+	case 4:
+		score = 120
 	}
 	totalScore += score
 
@@ -326,7 +347,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			log.Fatal(err)
 		}
 		fontGame1, _ := opentype.NewFace(tt, &opentype.FaceOptions{
-			Size:    32,
+			Size:    28,
 			DPI:     72,
 			Hinting: font.HintingFull,
 		})
