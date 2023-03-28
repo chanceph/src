@@ -112,8 +112,8 @@ type block struct {
 	x, y  int
 }
 
-func getRandomBlock() ([][]int, int) {
-	rand.Seed(time.Now().UnixNano())
+func getRandomBlock(offset int64) ([][]int, int) {
+	rand.Seed(time.Now().UnixNano() + offset)
 	randInt := rand.Intn(len(blocks))
 	return blocks[randInt], randInt
 }
@@ -215,7 +215,7 @@ func moveDown() {
 		curX = (gameWidth/blockSize - len(curBlock[0])) / 2
 		curY = 0
 
-		nextBlock, nextColor = getRandomBlock()
+		nextBlock, nextColor = getRandomBlock(0)
 	}
 }
 
@@ -403,12 +403,12 @@ func initGame() {
 		game[i] = make([]int, gameWidth/blockSize)
 	}
 	// 随机生成当前方块状态
-	curBlock, curColor = getRandomBlock()
+	curBlock, curColor = getRandomBlock(0)
 	curX = (gameWidth/blockSize - len(curBlock[0])) / 2
 	curY = 0
 
 	// 随机生成下一个方块状态
-	nextBlock, nextColor = getRandomBlock()
+	nextBlock, nextColor = getRandomBlock(1)
 	nextX = (gameWidth / blockSize) + ((infoWidth)/blockSize-len(curBlock[0]))/2
 	nextY = 2
 }
